@@ -37,8 +37,14 @@ def calculate_demographic_data(print_data=True):
     num_min_workers = mh_df.shape[0]
 
     rich_percentage = round(mh_df.loc[mh_df["salary"] == ">50K"].shape[0] / num_min_workers * 100, 1)
+    
+    hpg_df = df.groupby(["native-country", "salary"]).count().reset_index().rename(columns={'age': 'cnt'})
+    hpgr_df = hpg_df.loc[hpg_df["salary"] == ">50K"][["native-country", "cnt"]].set_index("native-country")
+    hpgp_df = hpg_df.loc[hpg_df["salary"] == "<=50K"][["native-country", "cnt"]].set_index("native-country")
+    print(hpgp_df.join(hpgr_df, lsuffix="p", rsuffix="r"))
 
-    print(df.groupby(["native-country", "salary"]).count().reset_index())
+    #df_combined = pd.concat([df1, df2], axis=1)
+    #.rename(columns={'A': 'New_A'})
 
     # What country has the highest percentage of people that earn >50K?
     highest_earning_country = None
