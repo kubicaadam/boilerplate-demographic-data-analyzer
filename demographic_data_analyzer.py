@@ -37,21 +37,21 @@ def calculate_demographic_data(print_data=True):
     num_min_workers = mh_df.shape[0]
 
     rich_percentage = round(mh_df.loc[mh_df["salary"] == ">50K"].shape[0] / num_min_workers * 100, 1)
-    
-    hpg_df = df.groupby(["native-country", "salary"]).count().reset_index().rename(columns={'age': 'cnt'})
-    hpgr_df = hpg_df.loc[hpg_df["salary"] == ">50K"][["native-country", "cnt"]].set_index("native-country")
-    hpgp_df = hpg_df.loc[hpg_df["salary"] == "<=50K"][["native-country", "cnt"]].set_index("native-country")
-    print(hpgp_df.join(hpgr_df, lsuffix="p", rsuffix="r"))
-
-    #df_combined = pd.concat([df1, df2], axis=1)
-    #.rename(columns={'A': 'New_A'})
 
     # What country has the highest percentage of people that earn >50K?
-    highest_earning_country = None
-    highest_earning_country_percentage = None
+    #hp_df = df.groupby(["native-country"]).count()#.reset_index().rename(columns={'age': 'cnt'})
+    hpga_df = df.groupby(["native-country"]).size().reset_index(name="cnt").set_index("native-country")
+    hpgr_df = df.loc[df["salary"] == ">50K"].groupby(["native-country"]).size().reset_index(name="cnt").set_index("native-country")
+    hpg = hpga_df.join(hpgr_df, rsuffix="r")
+    hpg["perc"] = hpg["cntr"] / hpg["cnt"] * 100
+
+    
+    highest_earning_country = hpg.loc[hpg["perc"] == hpg["perc"].max()].index[0]
+    highest_earning_country_percentage = round(hpg["perc"].max(), 1)
 
     # Identify the most popular occupation for those who earn >50K in India.
-    top_IN_occupation = None
+    dfpi = df.loc[(df["native-country"] == "India") & (df["salary"] == ">50K")].groupby("occupation").size().reset_index(name="cnt").sort_values(by=["cnt"], ascending=False)
+    top_IN_occupation = dfpi.iloc[0, 0]
 
     # DO NOT MODIFY BELOW THIS LINE
 
